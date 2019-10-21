@@ -1,0 +1,18 @@
+{
+  "require": {
+    "guzzlehttp/guzzle": "^6.3",
+    "imangazaliev/didom": "^1.14",
+    "ext-pcntl": "*",
+    "curl/curl": "^2.2",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "core\\": "core",
+      "models\\": "models",
+      "traits\\": "traits"
+    }
+  }
+}

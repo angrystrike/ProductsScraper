@@ -18,14 +18,18 @@ class Category extends DB
         $this->category = $category;
     }
 
-    public function parse($proxyPool, $client)
+    public function parse()
     {
+        $uri = $this->category->first('.widget-list__item-link')->attr('href');
         $categoryData = [
             'name'  => $this->category->first('.widget-list__item-title a')->text(),
-            'uri'   => $this->category->first('.widget-list__item-link')->attr('href'),
+            'uri'   => $uri,
             'image' => $this->category->first('.widget-list__image')->attr('style')
         ];
+        print_r($categoryData);
+
 
         DB::create('categories', $categoryData);
+        return $uri;
     }
 }

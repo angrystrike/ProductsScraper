@@ -7,6 +7,7 @@ namespace core;
 use DiDom\Document;
 use GuzzleHttp\Client;
 use models\Category;
+use models\Ingredient;
 use traits\HTML;
 
 
@@ -35,8 +36,10 @@ class General
         $categories = $categoriesPage->find('.widget-list__item');
         foreach ($categories as $category) {
             $category = new Category($category);
-            $categoryLink = $category->parse($this->client, $this->proxyPool);
-
+            $categoryLink = $category->parse();
+            exit();
+            $ingredient = new Ingredient($categoryLink);
+            $ingredient->parse($this->client);
             exit();
         }
 

@@ -26,21 +26,24 @@ class General
         ]);
 
         //$params = require 'config/params.php';
-       // $this->proxyPool = new ProxyPool($params['proxiesLink']);
+        // $this->proxyPool = new ProxyPool($params['proxiesLink']);
     }
 
     public function parseWholeSite()
     {
         $categoriesPage = new Document($this->client->get(ROOT)->getBody()->getContents());
-
         $categories = $categoriesPage->find('.widget-list__item');
+
         foreach ($categories as $category) {
-            $category = new Category($category);
-            $categoryData = $category->parse();
+            $pid = pcntl_fork();
+            if (!$pid) {
+                $category = new Category($category);
+                $categoryData = $category->parse();
 
-            $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
-            $ingredient->parse($this->client);
-
+                $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
+                $ingredient->parse($this->client);
+                exit();
+            }
         }
 
     }

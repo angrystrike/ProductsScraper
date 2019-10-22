@@ -31,7 +31,7 @@ class Category extends DB
             'img_origin_link' => $imageUri
         ];
         file_put_contents("./public/images/categories/{$name}.jpg", file_get_contents($imageUri));
-
+        echo "Category: {$name}\n";
         $categoryId = DB::create('categories', $categoryData);
         return [$uri, $categoryId];
     }

@@ -6,34 +6,43 @@ namespace models;
 
 use core\DB;
 use DiDom\Document;
-use traits\HTML;
+use traits\Parsable;
 
 class Ingredient extends DB
 {
-    use HTML;
+    use Parsable;
 
     private $categoryLink;
+    private $categoryId;
 
-    public function __construct($categoryLink)
+    public function __construct($categoryLink, $categoryId)
     {
         $this->categoryLink = $categoryLink;
+        $this->categoryId = $categoryId;
     }
 
     public function parse($client)
     {
-        $counter = 0;
-        $ingredientsPage = new Document($client->get($this->categoryLink)->getBody()->getContents());
-        $paginationLinks = $ingredientsPage->find('.wiki-page__alphabet a');
+        $ingredientsMainPage = new Document($client->get($this->categoryLink)->getBody()->getContents());
+        $paginationLinks = $ingredientsMainPage->find('.wiki-page__alphabet a');
 
         foreach ($paginationLinks as $link) {
-            echo $link->attr('href') . "\n";
             $paginated = new Document($client->get($link->attr('href'))->getBody()->getContents());
-           // echo $paginated->first('.title a')->text() . " ";
-            foreach ($paginated->find('.item-description .title a') as $title) {
-                echo $title->text() . " ";
-                $counter++;
+
+            foreach ($paginated->find('.item-description') as $ingredient) {
+                $uri = $ingredient->first('.title a')->attr('href');
+                $name = $ingredient->first('.lead')->text();
+                /*$ingredientData = [
+                    'name'              => $ingredient->first('.title a')->text(),
+                    'short_description' =>,
+                    'uri'               => $uri
+                ];*/
+                $ingredientsPage = new Document($client->get($uri)->getBody()->getContents());
+                $imageLink = 'https:' . $ingredientsPage->first('wiki__cover img')->attr('src');
+
+                //DB::create('ingridients', ['name' => $title->text()]);
             }
         }
-        echo "\n" . $counter;
+
     }
 }

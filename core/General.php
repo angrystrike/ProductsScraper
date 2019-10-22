@@ -8,12 +8,12 @@ use DiDom\Document;
 use GuzzleHttp\Client;
 use models\Category;
 use models\Ingredient;
-use traits\HTML;
+use traits\Parsable;
 
 
 class General
 {
-    use HTML;
+    use Parsable;
 
     private $proxyPool;
     private $client;
@@ -36,11 +36,11 @@ class General
         $categories = $categoriesPage->find('.widget-list__item');
         foreach ($categories as $category) {
             $category = new Category($category);
-            $categoryLink = $category->parse();
-            exit();
-            $ingredient = new Ingredient($categoryLink);
+            $categoryData = $category->parse();
+
+            $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
             $ingredient->parse($this->client);
-            exit();
+
         }
 
     }

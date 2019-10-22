@@ -9,7 +9,7 @@ use Exception;
 use GuzzleHttp\Client;
 
 
-trait HTML
+trait Parsable
 {
     function getHTML($link, ProxyPool $proxyPool, Client $client)
     {
@@ -24,5 +24,11 @@ trait HTML
         }
 
         return new Document($html);
+    }
+
+    private function getUrlFromStyle($styleString)
+    {
+        $uri = substr($styleString, strpos($styleString, '//') + strlen('//'));
+        return 'https://' . trim($uri, ')');
     }
 }

@@ -22,12 +22,34 @@ class ProxyPool
         $allProxies = json_decode($allProxies, true);
 
         foreach ($allProxies as $proxy) {
-            if (self::checkProxy($proxy['ip'], $proxy['port'])) {
+            if ($this->checkProxy($proxy['ip'], $proxy['port'])) {
                 $this->proxies[] = $proxy['ip'] . ':' . $proxy['port'];
             }
         }
+        $this->getRandom();
+    }
 
-        self::getRandom();
+    public function getRandom()
+    {
+        $badProxyKey = array_search($this->getCurrent(), $this->proxies);
+        unset($this->proxies[$badProxyKey]);
+        $this->proxies = array_values($this->proxies);
+
+        $lastIndex = rand(0, count($this->proxies) - 1);
+        $newProxy = $this->proxies[$lastIndex];
+        $this->setCurrent($newProxy);
+
+        return $newProxy;
+    }
+
+    private function checkProxy($ip, $port)
+    {
+        $timeout = 3;
+        if ($con = @fsockopen($ip, $port, $errorNumber, $errorMessage, $timeout)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function setCurrent($proxy)
@@ -40,22 +62,8 @@ class ProxyPool
         return $this->current;
     }
 
-    public function getRandom()
+    public function getProxiesCount()
     {
-        $lastIndex = rand(0, count($this->proxies) - 1);
-        $newProxy = $this->proxies[$lastIndex];
-        self::setCurrent($newProxy);
-
-        return $newProxy;
-    }
-
-    private function checkProxy($ip, $port)
-    {
-        $timeout = 10;
-        if ($con = @fsockopen($ip, $port, $errorNumber, $errorMessage, $timeout)) {
-            return true;
-        } else {
-            return false;
-        }
+        return count($this->proxies);
     }
 }

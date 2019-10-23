@@ -14,6 +14,7 @@ class Ingredient extends DB
 
     private $categoryLink;
     private $categoryId;
+    private $page;
 
     public function __construct($categoryLink, $categoryId)
     {
@@ -21,61 +22,73 @@ class Ingredient extends DB
         $this->categoryId = $categoryId;
     }
 
-    public function parse($client)
+    public function parse($client, $pool)
     {
-        $ingredientsMainPage = new Document($client->get($this->categoryLink)->getBody()->getContents());
+        $ingredientsMainPage = $this->getHTML($this->categoryLink, $pool, $client);
         $paginationLinks = $ingredientsMainPage->find('.wiki-page__alphabet a');
 
         foreach ($paginationLinks as $link) {
-            $paginated = new Document($client->get($link->attr('href'))->getBody()->getContents());
+            $paginated = $this->getHTML($link->attr('href'), $pool, $client);
 
             foreach ($paginated->find('.item-description') as $ingredient) {
-                $uri = $ingredient->first('.title a')->attr('href');
-                $shortDescription = $ingredient->first('.lead')->text();
-                $ingredientsPage = new Document($client->get($uri)->getBody()->getContents());
 
-                $imageUri = 'https:' . $ingredientsPage->first('.wiki__cover img')->attr('src');
-                $name = $ingredientsPage->first('.wiki__title')->text();
-                $description = $ingredientsPage->first('.wiki__description')->text();
+                $ingredientData = $this->getInfo($ingredient, $client, $pool);
+                file_put_contents("./public/images/ingredients/{$ingredientData['image']}", file_get_contents($ingredientData['img_origin_link']));
 
-                file_put_contents("./public/images/ingredients/{$name}.jpg", file_get_contents($imageUri));
-
-                $ingredientData = [
-                    'name'              => $name,
-                    'short_description' => $shortDescription,
-                    'uri'               => $uri,
-                    'image'             => "{$name}.jpg",
-                    'img_origin_link'   => $imageUri,
-                    'description'       => $description,
-                    'category_id'       => $this->categoryId
-                ];
-
-                echo "Main ingr: {$name}\n";
-
-                $ingredientData['parent_id'] = DB::create('ingridients', $ingredientData);
+                $ingredientData['parent_id'] = DB::create('ingredients', $ingredientData);
                 $ingredientData['short_description'] = null;
 
-                foreach ($ingredientsPage->find('.wiki__sub-item') as $subItem) {
+                echo "Main ingredient: {$ingredientData['name']}\n";
 
-                    $description = $subItem->first('.wiki__description')->text();
-                    $ingredientData['description'] = !empty($description) ? $description : null;
-
-                    $ingredientData['name'] = $subItem->first('.wiki__second-title')->text();
-
-                    $image = $subItem->first('.wiki__sub-img img');
-                    if (!empty($image)) {
-                        $ingredientData['image'] = $ingredientData['name'] . '.jpg';
-                        $ingredientData['img_origin_link'] = 'https:' . $image->attr('src');
-                    }
-
-                    echo "Sub ingr: {$ingredientData['name']}\n";
-
-                    file_put_contents("./public/images/ingredients/{$ingredientData['image']}", file_get_contents($ingredientData['img_origin_link']));
-                    DB::create('ingridients', $ingredientData);
+                foreach ($this->page->find('.wiki__sub-item') as $subItem) {
+                    $this->parseSubItem($subItem, $ingredientData);
                 }
 
             }
         }
 
+    }
+
+    private function parseSubItem($item, $data)
+    {
+        $description = $item->first('.wiki__description')->text();
+        $data['description'] = !empty($description) ? $description : null;
+
+        $data['name'] = $item->first('.wiki__second-title')->text();
+
+        $image = $item->first('.wiki__sub-img img');
+        if (!empty($image)) {
+            $data['image'] = $data['name'] . '.jpg';
+            $data['img_origin_link'] = 'https:' . $image->attr('src');
+            file_put_contents("./public/images/ingredients/{$data['image']}", file_get_contents($data['img_origin_link']));
+        } else {
+            $data['image'] = null;
+            $data['img_origin_link'] = null;
+        }
+
+        DB::create('ingredients', $data);
+        echo "Sub ingredient: {$data['name']}\n";
+    }
+
+    private function getInfo($item, $client, $pool)
+    {
+        $uri = $item->first('.title a')->attr('href');
+        $shortDescription = $item->first('.lead')->text();
+
+        $this->page = $this->getHTML($uri, $pool, $client);
+        $imageUri = 'https:' . $this->page->first('.wiki__cover img')->attr('src');
+
+        $name = $this->page->first('.wiki__title')->text();
+        $description = $this->page->first('.wiki__description')->text();
+
+        return [
+            'name'              => $name,
+            'short_description' => $shortDescription,
+            'uri'               => $uri,
+            'image'             => "{$name}.jpg",
+            'img_origin_link'   => $imageUri,
+            'description'       => $description,
+            'category_id'       => $this->categoryId,
+        ];
     }
 }

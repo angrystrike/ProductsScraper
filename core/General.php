@@ -25,13 +25,13 @@ class General
             'curl' => [ CURLOPT_SSLVERSION => 1 ],
         ]);
 
-        //$params = require 'config/params.php';
-        // $this->proxyPool = new ProxyPool($params['proxiesLink']);
+        $params = require 'config/params.php';
+        $this->proxyPool = new ProxyPool($params['proxiesLink']);
     }
 
     public function parseWholeSite()
     {
-        $categoriesPage = new Document($this->client->get(ROOT)->getBody()->getContents());
+        $categoriesPage = $this->getHTML(ROOT, $this->proxyPool, $this->client);
         $categories = $categoriesPage->find('.widget-list__item');
 
         foreach ($categories as $category) {
@@ -41,11 +41,12 @@ class General
                 $categoryData = $category->parse();
 
                 $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
-                $ingredient->parse($this->client);
+                $ingredient->parse($this->client, $this->proxyPool);
                 exit();
             }
         }
 
+        die;
     }
 
 }

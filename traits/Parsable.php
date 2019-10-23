@@ -13,17 +13,25 @@ trait Parsable
 {
     function getHTML($link, ProxyPool $proxyPool, Client $client)
     {
-        try {
-            $html = $client->get($link, ['proxy' => $proxyPool->getCurrent()])->getBody()->getContents();
-            error_log("Current proxy: {$proxyPool->getCurrent()}", 0);
+        $triesBeforeRemoveProxy = 3;
 
-        } catch (Exception $exception) {
-            error_log("Error: $link", 0);
-            sleep(25);
-            $html = $client->get($link, ['proxy' => $proxyPool->getRandom()])->getBody()->getContents();
+        while ($proxyPool->getProxiesCount()) {
+
+            for ($i = 0; $i < $triesBeforeRemoveProxy; $i++) {
+                try {
+                    $html = $client->get($link, ['proxy' => $proxyPool->getCurrent()])->getBody()->getContents();
+                    return new Document($html);
+                } catch (Exception $exception) {
+                    echo "Proxy crashed on link: $link. Error: {$exception->getMessage()}";
+                    sleep(5);
+                }
+            }
+            error_log("Proxy totally crashed and was replaced: $link", 0);
+            $proxyPool->getRandom();
         }
 
-        return new Document($html);
+        error_log("No proxies left. Aborting parsing", 0);
+        die;
     }
 
     private function getUrlFromStyle($styleString)

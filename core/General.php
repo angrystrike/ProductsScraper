@@ -4,7 +4,6 @@
 namespace core;
 
 
-use DiDom\Document;
 use GuzzleHttp\Client;
 use models\Category;
 use models\Ingredient;
@@ -36,7 +35,11 @@ class General
 
         foreach ($categories as $category) {
             $pid = pcntl_fork();
-            if (!$pid) {
+            if ($pid == -1) {
+                die("Error: impossible to fork()\n");
+            } elseif (!$pid) {
+                $childProcesses[] = $pid;
+            } else {
                 $category = new Category($category);
                 $categoryData = $category->parse();
 
@@ -46,7 +49,10 @@ class General
             }
         }
 
-        die;
+        foreach ($childProcesses as $pid) {
+            pcntl_waitpid($pid, $status);
+        }
+        exit();
     }
 
 }

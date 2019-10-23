@@ -38,7 +38,7 @@ class Ingredient extends DB
                 $ingredientData['parent_id'] = DB::create('ingredients', $ingredientData);
                 $ingredientData['short_description'] = null;
 
-                echo "Main ingredient: {$ingredientData['name']}\n";
+                echo "\nMain ingredient: {$ingredientData['name']}";
 
                 foreach ($this->page->find('.wiki__sub-item') as $subItem) {
                     $this->parseSubItem($subItem, $ingredientData);
@@ -52,7 +52,7 @@ class Ingredient extends DB
     private function parseSubItem($item, $data)
     {
         $description = $item->first('.wiki__description')->text();
-        $data['description'] = !empty($description) ? $description : null;
+        $data['description'] = !empty($description) ? trim($description) : null;
 
         $data['name'] = $item->first('.wiki__second-title')->text();
 
@@ -67,7 +67,7 @@ class Ingredient extends DB
         }
 
         DB::create('ingredients', $data);
-        echo "Sub ingredient: {$data['name']}\n";
+        echo "\nSub ingredient: {$data['name']}";
     }
 
     private function getInfo($item, $client, $pool)
@@ -83,11 +83,11 @@ class Ingredient extends DB
 
         return [
             'name'              => $name,
-            'short_description' => $shortDescription,
+            'short_description' => trim($shortDescription),
             'uri'               => $uri,
             'image'             => "{$name}.jpg",
             'img_origin_link'   => $imageUri,
-            'description'       => $description,
+            'description'       => trim($description),
             'category_id'       => $this->categoryId,
         ];
     }

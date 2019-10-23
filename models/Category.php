@@ -28,7 +28,7 @@ class Category extends DB
             'name'              => $name,
             'uri'               => $uri,
             'image'             => "{$name}.jpg",
-            'img_origin_link' => $imageUri
+            'img_origin_link'   => $imageUri
         ];
         file_put_contents("./public/images/categories/{$name}.jpg", file_get_contents($imageUri));
 

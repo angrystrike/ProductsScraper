@@ -13,7 +13,7 @@ trait Parsable
 {
     function getHTML($link, ProxyPool $proxyPool, Client $client)
     {
-        $triesBeforeRemoveProxy = 3;
+        $triesBeforeRemoveProxy = 4;
 
         while ($proxyPool->getProxiesCount()) {
 
@@ -22,16 +22,16 @@ trait Parsable
                     $html = $client->get($link, ['proxy' => $proxyPool->getCurrent()])->getBody()->getContents();
                     return new Document($html);
                 } catch (Exception $exception) {
-                    echo "Proxy crashed on link: $link. Error: {$exception->getMessage()}";
-                    sleep(5);
+                    echo "\nProxy crashed on link: $link";
+                    echo "\nError: {$exception->getMessage()}";
+                    sleep(8);
                 }
             }
-            error_log("Proxy totally crashed and was replaced: $link", 0);
+            echo "\nProxy totally crashed and was replaced";
             $proxyPool->getRandom();
         }
 
-        error_log("No proxies left. Aborting parsing", 0);
-        die;
+        exit("\nNo proxies left. Aborting parsing\n");
     }
 
     private function getUrlFromStyle($styleString)

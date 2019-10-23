@@ -5,11 +5,11 @@ namespace models;
 
 
 use core\DB;
-use traits\HTML;
+use traits\Parsable;
 
 class Category extends DB
 {
-    use HTML;
+    use Parsable;
 
     private $category;
 
@@ -18,14 +18,23 @@ class Category extends DB
         $this->category = $category;
     }
 
-    public function parse($proxyPool, $client)
+    public function parse()
     {
-        $categoryData = [
-            'name'  => $this->category->first('.widget-list__item-title a')->text(),
-            'uri'   => $this->category->first('.widget-list__item-link')->attr('href'),
-            'image' => $this->category->first('.widget-list__image')->attr('style')
-        ];
+        $uri = $this->category->first('.widget-list__item-link')->attr('href');
+        $name = $this->category->first('.widget-list__item-title a')->text();
+        $imageUri = $this->getUrlFromStyle($this->category->first('.widget-list__image')->attr('style'));
 
-        DB::create('categories', $categoryData);
+        $categoryData = [
+            'name'              => $name,
+            'uri'               => $uri,
+            'image'             => "{$name}.jpg",
+            'img_origin_link'   => $imageUri
+        ];
+        file_put_contents("./public/images/categories/{$name}.jpg", file_get_contents($imageUri));
+
+        echo "Category: {$name}\n";
+        $categoryId = DB::create('categories', $categoryData);
+
+        return [$uri, $categoryId];
     }
 }

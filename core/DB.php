@@ -21,7 +21,7 @@ class DB
     {
         $params = require __DIR__ . '/../config/params.php';
 
-        $connectionString = "mysql:host={$params['host']};dbname={$params['dbname']}";
+        $connectionString = "mysql:host={$params['host']};dbname={$params['dbname']};charset=utf8";
         $db = new PDO($connectionString, $params['user'], $params['password']);
 
         return $db;

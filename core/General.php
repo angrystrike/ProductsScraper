@@ -4,15 +4,15 @@
 namespace core;
 
 
-use DiDom\Document;
 use GuzzleHttp\Client;
 use models\Category;
-use traits\HTML;
+use models\Ingredient;
+use traits\Parsable;
 
 
 class General
 {
-    use HTML;
+    use Parsable;
 
     private $proxyPool;
     private $client;
@@ -24,22 +24,35 @@ class General
             'curl' => [ CURLOPT_SSLVERSION => 1 ],
         ]);
 
-        //$params = require 'config/params.php';
-       // $this->proxyPool = new ProxyPool($params['proxiesLink']);
+        $params = require 'config/params.php';
+        $this->proxyPool = new ProxyPool($params['proxiesLink']);
     }
 
     public function parseWholeSite()
     {
-        $categoriesPage = new Document($this->client->get(ROOT)->getBody()->getContents());
-
+        $categoriesPage = $this->getHTML(ROOT, $this->proxyPool, $this->client);
         $categories = $categoriesPage->find('.widget-list__item');
-        foreach ($categories as $category) {
-            $category = new Category($category);
-            $categoryLink = $category->parse($this->client, $this->proxyPool);
 
-            exit();
+        foreach ($categories as $category) {
+            $pid = pcntl_fork();
+            if ($pid == -1) {
+                die("Error: impossible to fork()\n");
+            } elseif (!$pid) {
+                $childProcesses[] = $pid;
+            } else {
+                $category = new Category($category);
+                $categoryData = $category->parse();
+
+                $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
+                $ingredient->parse($this->client, $this->proxyPool);
+                exit();
+            }
         }
 
+        foreach ($childProcesses as $pid) {
+            pcntl_waitpid($pid, $status);
+        }
+        exit();
     }
 
 }

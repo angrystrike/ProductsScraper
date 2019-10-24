@@ -11,7 +11,7 @@ use GuzzleHttp\Client;
 
 trait Parsable
 {
-    function getHTML($link, ProxyPool $proxyPool, Client $client)
+    private function getHTML($link, ProxyPool $proxyPool, Client $client)
     {
         $triesBeforeRemoveProxy = 4;
 
@@ -38,5 +38,26 @@ trait Parsable
     {
         $uri = substr($styleString, strpos($styleString, '//') + strlen('//'));
         return 'https://' . trim($uri, ')');
+    }
+
+    private function getImage($path, $data)
+    {
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new \ErrorException($message, $severity, $severity, $file, $line);
+        });
+
+        if(!file_exists($path) || !is_dir($path)) {
+
+        }
+
+        try {
+            file_put_contents($path, file_get_contents($data['img_origin_link']));
+        } catch(Exception $e){
+            $data['image'] = null;
+            $data['img_origin_link'] = null;
+        }
+
+        restore_error_handler();
+        return $data;
     }
 }

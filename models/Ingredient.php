@@ -33,7 +33,7 @@ class Ingredient extends DB
             foreach ($paginated->find('.item-description') as $ingredient) {
 
                 $ingredientData = $this->getInfo($ingredient, $client, $pool);
-                file_put_contents("./public/images/ingredients/{$ingredientData['image']}", file_get_contents($ingredientData['img_origin_link']));
+                $ingredientData = $this->getImage("./public/images/ingredients/{$ingredientData['name']}.jpg", $ingredientData);
 
                 $ingredientData['parent_id'] = DB::create('ingredients', $ingredientData);
                 $ingredientData['short_description'] = null;
@@ -60,7 +60,7 @@ class Ingredient extends DB
         if (!empty($image)) {
             $data['image'] = $data['name'] . '.jpg';
             $data['img_origin_link'] = 'https:' . $image->attr('src');
-            file_put_contents("./public/images/ingredients/{$data['image']}", file_get_contents($data['img_origin_link']));
+            $data = $this->getImage("./public/images/ingredients/{$data['name']}.jpg", $data);
         } else {
             $data['image'] = null;
             $data['img_origin_link'] = null;

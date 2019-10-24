@@ -30,7 +30,7 @@ class Category extends DB
             'image'             => "{$name}.jpg",
             'img_origin_link'   => $imageUri
         ];
-        file_put_contents("./public/images/categories/{$name}.jpg", file_get_contents($imageUri));
+        $categoryData = $this->getImage("./public/images/categories/{$name}.jpg", $categoryData);
 
         echo "\nCategory: {$name}";
         $categoryId = DB::create('categories', $categoryData);

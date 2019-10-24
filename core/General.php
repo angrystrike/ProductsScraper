@@ -24,6 +24,8 @@ class General
             'curl' => [ CURLOPT_SSLVERSION => 1 ],
         ]);
 
+        //         $params = require __DIR__ . '/../config/params.php';
+
         $params = require 'config/params.php';
         $this->proxyPool = new ProxyPool($params['proxiesLink']);
     }

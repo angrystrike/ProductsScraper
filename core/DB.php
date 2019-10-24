@@ -20,11 +20,9 @@ class DB
     private static function setConnection()
     {
         $params = require __DIR__ . '/../config/params.php';
-
         $connectionString = "mysql:host={$params['host']};dbname={$params['dbname']};charset=utf8";
-        $db = new PDO($connectionString, $params['user'], $params['password']);
 
-        return $db;
+        return new PDO($connectionString, $params['user'], $params['password']);
     }
 
     public static function create($table, array $data)

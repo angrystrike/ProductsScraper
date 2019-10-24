@@ -83,11 +83,11 @@ class Ingredient extends DB
 
         return [
             'name'              => $name,
-            'short_description' => trim($shortDescription),
+            'short_description' => !empty($shortDescription) ? trim($shortDescription) : null,
             'uri'               => $uri,
             'image'             => "{$name}.jpg",
             'img_origin_link'   => $imageUri,
-            'description'       => trim($description),
+            'description'       => !empty($description) ? trim($description) : null,
             'category_id'       => $this->categoryId,
         ];
     }

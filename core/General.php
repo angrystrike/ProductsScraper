@@ -36,8 +36,8 @@ class General
         foreach ($categories as $category) {
             $pid = pcntl_fork();
             if ($pid == -1) {
-                die("Error: impossible to fork()\n");
-            } elseif (!$pid) {
+                die("Error: impossible to fork\n");
+            } elseif ($pid) {
                 $childProcesses[] = $pid;
             } else {
                 $category = new Category($category);
@@ -45,6 +45,7 @@ class General
 
                 $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
                 $ingredient->parse($this->client, $this->proxyPool);
+
                 exit();
             }
         }
@@ -52,7 +53,8 @@ class General
         foreach ($childProcesses as $pid) {
             pcntl_waitpid($pid, $status);
         }
-        exit();
+
+        exit("\nParsing finished\n");
     }
 
 }

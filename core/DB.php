@@ -42,4 +42,9 @@ class DB
 
         return self::$db->lastInsertId();
     }
+
+    public static function count($table)
+    {
+        return self::getConnection()->query("SELECT COUNT(*) FROM $table")->fetchColumn();
+    }
 }

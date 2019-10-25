@@ -23,9 +23,6 @@ class General
             'timeout' => 300,
             'curl' => [ CURLOPT_SSLVERSION => 1 ],
         ]);
-
-        //         $params = require __DIR__ . '/../config/params.php';
-
         $params = require 'config/params.php';
         $this->proxyPool = new ProxyPool($params['proxiesLink']);
     }
@@ -45,8 +42,10 @@ class General
                 $category = new Category($category);
                 $categoryData = $category->parse();
 
-                $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
+                $ingredient = new Ingredient($categoryData['uri'], $categoryData['id']);
                 $ingredient->parse($this->client, $this->proxyPool);
+
+                echo "\nCategory {$categoryData['name']} was parsed\n";
 
                 exit();
             }
@@ -56,7 +55,9 @@ class General
             pcntl_waitpid($pid, $status);
         }
 
-        exit("\nParsing finished\n");
+        echo "\nParsing finished. Total statistics:\n";
+        echo  "\nTotal categories: " .  DB::count('categories');
+        echo  "\nTotal ingredients: " .  DB::count('ingredients');
     }
 
 }

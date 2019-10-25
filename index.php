@@ -9,9 +9,6 @@ define('ROOT', 'https://eda.ru/wiki/ingredienty');
 
 require_once 'vendor/autoload.php';
 
-$dir = './public/images/ingredients/';
-
-
-/*$scraper = new General();
-$scraper->parseWholeSite();*/
+$scraper = new General();
+$scraper->parseWholeSite();
 

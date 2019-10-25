@@ -18,15 +18,12 @@ class ProxyPool
             'curl' => [ CURLOPT_SSLVERSION => 1 ],
         ]);
 
-        $allProxies = $client->get($proxiesLink)->getBody()->getContents();
-        $allProxies = json_decode($allProxies, true);
-
-        foreach ($allProxies as $proxy) {
-            if ($this->checkProxy($proxy['ip'], $proxy['port'])) {
-                $this->proxies[] = $proxy['ip'] . ':' . $proxy['port'];
-            }
+        $proxies = $client->get($proxiesLink)->getBody()->getContents();
+        $proxies = json_decode($proxies, true);
+        foreach ($proxies as $proxy) {
+            $this->proxies[] = $proxy['ip'] . ':' . $proxy['port'];
         }
-        $this->getRandom();
+        $this->setCurrent($proxies[0]);
     }
 
     public function getRandom()
@@ -40,16 +37,6 @@ class ProxyPool
         $this->setCurrent($newProxy);
 
         return $newProxy;
-    }
-
-    private function checkProxy($ip, $port)
-    {
-        $timeout = 3;
-        if ($con = @fsockopen($ip, $port, $errorNumber, $errorMessage, $timeout)) {
-            return true;
-        }
-
-        return false;
     }
 
     public function setCurrent($proxy)

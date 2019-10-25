@@ -46,12 +46,12 @@ trait Parsable
             throw new \ErrorException($message, $severity, $severity, $file, $line);
         });
 
-        if(!file_exists($path) || !is_dir($path)) {
-
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
         }
 
         try {
-            file_put_contents($path, file_get_contents($data['img_origin_link']));
+            file_put_contents($path . $data['image'] . '.jpg', file_get_contents($data['img_origin_link']));
         } catch(Exception $e){
             $data['image'] = null;
             $data['img_origin_link'] = null;

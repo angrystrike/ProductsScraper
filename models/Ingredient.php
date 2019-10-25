@@ -33,12 +33,12 @@ class Ingredient extends DB
             foreach ($paginated->find('.item-description') as $ingredient) {
 
                 $ingredientData = $this->getInfo($ingredient, $client, $pool);
-                $ingredientData = $this->getImage("./public/images/ingredients/{$ingredientData['name']}.jpg", $ingredientData);
+                $ingredientData = $this->getImage('./images/ingredients/', $ingredientData);
 
                 $ingredientData['parent_id'] = DB::create('ingredients', $ingredientData);
                 $ingredientData['short_description'] = null;
 
-                echo "\nMain ingredient: {$ingredientData['name']}";
+                echo "\nMain ingredient: {$ingredientData['name']} parsed";
 
                 foreach ($this->page->find('.wiki__sub-item') as $subItem) {
                     $this->parseSubItem($subItem, $ingredientData);
@@ -60,14 +60,14 @@ class Ingredient extends DB
         if (!empty($image)) {
             $data['image'] = $data['name'] . '.jpg';
             $data['img_origin_link'] = 'https:' . $image->attr('src');
-            $data = $this->getImage("./public/images/ingredients/{$data['name']}.jpg", $data);
+            $data = $this->getImage('./images/ingredients/', $data);
         } else {
             $data['image'] = null;
             $data['img_origin_link'] = null;
         }
 
         DB::create('ingredients', $data);
-        echo "\nSub ingredient: {$data['name']}";
+        echo "\nSub ingredient {$data['name']} parsed";
     }
 
     private function getInfo($item, $client, $pool)

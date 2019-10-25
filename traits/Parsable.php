@@ -15,19 +15,19 @@ trait Parsable
     {
         $triesBeforeRemoveProxy = 4;
 
-        while ($proxyPool->getProxiesCount()) {
+        while ($proxyPool->getProxiesCount() > 1) {
 
             for ($i = 0; $i < $triesBeforeRemoveProxy; $i++) {
                 try {
                     $html = $client->get($link, ['proxy' => $proxyPool->getCurrent()])->getBody()->getContents();
                     return new Document($html);
                 } catch (Exception $exception) {
-                    echo "\nProxy crashed on link: $link";
-                    echo "\nError: {$exception->getMessage()}";
+                    echo "Proxy crashed on link: $link \n";
+                    echo "Error: {$exception->getMessage()} \n";
                     sleep(8);
                 }
             }
-            echo "\nProxy totally crashed and was replaced";
+            echo "Proxy totally crashed and was replaced \n";
             $proxyPool->getRandom();
         }
 

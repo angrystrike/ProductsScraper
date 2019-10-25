@@ -19,12 +19,10 @@ class General
 
     public function __construct()
     {
-        $this->client = new Client([
-            'timeout' => 300,
-            'curl' => [ CURLOPT_SSLVERSION => 1 ],
-        ]);
+        $this->client = new Client();
         $params = require 'config/params.php';
         $this->proxyPool = new ProxyPool($params['proxiesLink']);
+        DB::setConnection($params);
     }
 
     public function parseWholeSite()
@@ -35,7 +33,7 @@ class General
         foreach ($categories as $category) {
             $pid = pcntl_fork();
             if ($pid == -1) {
-                die("Error: impossible to fork\n");
+                die("Error: impossible to fork \n");
             } elseif ($pid) {
                 $childProcesses[] = $pid;
             } else {
@@ -55,9 +53,16 @@ class General
             pcntl_waitpid($pid, $status);
         }
 
-        echo "\nParsing finished. Total statistics:\n";
-        echo  "\nTotal categories: " .  DB::count('categories');
-        echo  "\nTotal ingredients: " .  DB::count('ingredients');
+
+        $sql = 'SELECT categories.name, count(*) as ingredient_count FROM ingredients JOIN categories ON ingredients.category_id = categories.id GROUP BY category_id';
+        $stats = DB::getConnection()->query($sql)->fetchAll();
+        echo "\nParsing finished. Statistics:\n";
+
+        foreach ($stats as $stat) {
+            echo "{$stat['ingredient_count']} ingredients in {$stat['name']}\n";
+        }
+        echo "\nTotal categories: " .  DB::count('categories') . "\n";
+        echo "Total ingredients: " .  DB::count('ingredients') . "\n";
     }
 
 }

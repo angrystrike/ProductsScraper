@@ -24,7 +24,8 @@ class Ingredient extends DB
 
     public function parse($client, $pool)
     {
-        for ($page = 1; $page++;) {
+        $page = 1;
+        while (true) {
             $paginated = $this->getHTML($this->categoryLink . '?page=' . $page, $pool, $client);
 
             if (!$paginated) {
@@ -47,6 +48,7 @@ class Ingredient extends DB
 
             }
 
+            $page++;
         }
 
     }

@@ -30,7 +30,7 @@ trait Parsable
                     sleep(8);
                 }
             }
-            echo "Proxy totally crashed and was replaced \n";
+            echo "Broken proxy was replaced \n";
             $proxyPool->getRandom();
         }
 
@@ -55,7 +55,7 @@ trait Parsable
 
         try {
             file_put_contents($path . $data['image'] . '.jpg', file_get_contents($data['img_origin_link']));
-        } catch(Exception $e){
+        } catch(Exception $exception){
             $data['image'] = null;
             $data['img_origin_link'] = null;
         }

@@ -16,11 +16,8 @@ class ProxyPool
     {
         $proxies = $this->checkProxiesLink($proxiesLink);
 
-        foreach ($proxies as $item) {
-            $proxy = $item['ip'] . ':' . $item['port'];
-            if ($this->checkProxy($proxy)) {
-                $this->proxies[] = $proxy;
-            }
+        foreach ($proxies as $proxy) {
+            $this->proxies[] = $proxy['ip'] . ':' . $proxy['port'];
         }
 
         $this->setCurrent($proxies[0]);
@@ -77,23 +74,5 @@ class ProxyPool
         }
 
         return $proxies;
-    }
-
-    private function checkProxy($proxy)
-    {
-        try {
-            $client = new Client();
-            $client->get(ROOT,
-                [
-                    'proxy' => $proxy,
-                    'timeout' => 5,
-                    'connect_timeout' => 5,
-                ])->getBody()->getContents();
-        } catch (Exception $exception) {
-            echo "Proxy fails\n";
-            return false;
-        }
-        echo "Proxy works\n";
-        return true;
     }
 }

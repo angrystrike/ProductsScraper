@@ -9,13 +9,14 @@ use PDO;
 class DB
 {
     private static $db;
+    public static $params;
 
-   /* public static function getConnection() {
+    public static function getConnection() {
         if (!(self::$db instanceof PDO)) {
-            self::$db = self::setConnection();
+            self::$db = self::setConnection(self::$params);
         }
         return self::$db;
-    }*/
+    }
 
     public static function setConnection($params)
     {
@@ -28,7 +29,7 @@ class DB
         $columns = implode(',', array_keys($data));
         $values = implode(',', array_fill(0, count($data), '?'));
 
-        $query = self::$db->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$values})");
+        $query = self::getConnection()->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$values})");
         $query->execute(array_values($data));
 
         return self::$db->lastInsertId();
@@ -36,6 +37,6 @@ class DB
 
     public static function count($table)
     {
-        return self::$db->query("SELECT COUNT(*) FROM $table")->fetchColumn();
+        return self::getConnection()->query("SELECT COUNT(*) FROM $table")->fetchColumn();
     }
 }

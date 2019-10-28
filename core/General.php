@@ -22,7 +22,7 @@ class General
         $this->client = new Client();
         $params = require 'config/params.php';
         $this->proxyPool = new ProxyPool($params['proxiesLink']);
-        DB::setConnection($params);
+        DB::$params = $params;
     }
 
     public function parseWholeSite()
@@ -43,7 +43,7 @@ class General
                 $ingredient = new Ingredient($categoryData['uri'], $categoryData['id']);
                 $ingredient->parse($this->client, $this->proxyPool);
 
-                echo "\nCategory {$categoryData['name']} was parsed\n";
+                echo "\nCategory {$categoryData['name']} was parsed\n\n";
 
                 exit();
             }

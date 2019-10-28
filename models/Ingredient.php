@@ -24,11 +24,12 @@ class Ingredient extends DB
 
     public function parse($client, $pool)
     {
-        $ingredientsMainPage = $this->getHTML($this->categoryLink, $pool, $client);
-        $paginationLinks = $ingredientsMainPage->find('.wiki-page__alphabet a');
+        for ($page = 1; $page++;) {
+            $paginated = $this->getHTML($this->categoryLink . '?page=' . $page, $pool, $client);
 
-        foreach ($paginationLinks as $link) {
-            $paginated = $this->getHTML($link->attr('href'), $pool, $client);
+            if (!$paginated) {
+                break;
+            }
 
             foreach ($paginated->find('.item-description') as $ingredient) {
 
@@ -45,6 +46,7 @@ class Ingredient extends DB
                 }
 
             }
+
         }
 
     }

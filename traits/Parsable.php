@@ -7,6 +7,7 @@ use core\ProxyPool;
 use DiDom\Document;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 
 trait Parsable
@@ -21,6 +22,8 @@ trait Parsable
                 try {
                     $html = $client->get($link, ['proxy' => $proxyPool->getCurrent()])->getBody()->getContents();
                     return new Document($html);
+                } catch (ClientException $exception) {
+                    return false;
                 } catch (Exception $exception) {
                     echo "Proxy crashed on link: $link \n";
                     echo "Error: {$exception->getMessage()} \n";

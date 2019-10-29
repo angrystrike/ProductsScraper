@@ -54,12 +54,12 @@ class General
         }
 
 
-        $sql = 'SELECT categories.name, count(*) as ingredient_count FROM ingredients JOIN categories ON ingredients.category_id = categories.id GROUP BY category_id';
+        $sql = 'SELECT categories.name, count(*) AS ingredient_count FROM ingredients JOIN categories ON ingredients.category_id = categories.id GROUP BY category_id';
         $stats = DB::getConnection()->query($sql)->fetchAll();
-        echo "\nParsing finished. Statistics:\n";
+        echo "\nParsing finished. Ingredients statistics:\n";
 
         foreach ($stats as $stat) {
-            echo "{$stat['ingredient_count']} ingredients in {$stat['name']}\n";
+            echo "{$stat['ingredient_count']} in {$stat['name']}\n";
         }
         echo "\nTotal categories: " .  DB::count('categories') . "\n";
         echo "Total ingredients: " .  DB::count('ingredients') . "\n";

@@ -3,7 +3,6 @@
 namespace core;
 
 
-use Exception;
 use GuzzleHttp\Client;
 
 

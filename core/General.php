@@ -19,13 +19,10 @@ class General
 
     public function __construct()
     {
-        $this->client = new Client([
-            'timeout' => 300,
-            'curl' => [ CURLOPT_SSLVERSION => 1 ],
-        ]);
-
+        $this->client = new Client();
         $params = require 'config/params.php';
         $this->proxyPool = new ProxyPool($params['proxiesLink']);
+        DB::$params = $params;
     }
 
     public function parseWholeSite()
@@ -36,15 +33,17 @@ class General
         foreach ($categories as $category) {
             $pid = pcntl_fork();
             if ($pid == -1) {
-                die("Error: impossible to fork\n");
+                die("Error: impossible to fork \n");
             } elseif ($pid) {
                 $childProcesses[] = $pid;
             } else {
                 $category = new Category($category);
                 $categoryData = $category->parse();
 
-                $ingredient = new Ingredient($categoryData[0], $categoryData[1]);
+                $ingredient = new Ingredient($categoryData['uri'], $categoryData['id']);
                 $ingredient->parse($this->client, $this->proxyPool);
+
+                echo "\nCategory {$categoryData['name']} was parsed\n\n";
 
                 exit();
             }
@@ -54,7 +53,16 @@ class General
             pcntl_waitpid($pid, $status);
         }
 
-        exit("\nParsing finished\n");
+
+        $sql = 'SELECT categories.name, count(*) AS ingredient_count FROM ingredients JOIN categories ON ingredients.category_id = categories.id GROUP BY category_id';
+        $stats = DB::getConnection()->query($sql)->fetchAll();
+        echo "\nParsing finished. Ingredients statistics:\n";
+
+        foreach ($stats as $stat) {
+            echo "{$stat['ingredient_count']} in {$stat['name']}\n";
+        }
+        echo "\nTotal categories: " .  DB::count('categories') . "\n";
+        echo "Total ingredients: " .  DB::count('ingredients') . "\n";
     }
 
 }

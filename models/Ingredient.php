@@ -24,27 +24,31 @@ class Ingredient extends DB
 
     public function parse($client, $pool)
     {
-        $ingredientsMainPage = $this->getHTML($this->categoryLink, $pool, $client);
-        $paginationLinks = $ingredientsMainPage->find('.wiki-page__alphabet a');
+        $page = 1;
+        while (true) {
+            $paginated = $this->getHTML($this->categoryLink . '?page=' . $page, $pool, $client);
 
-        foreach ($paginationLinks as $link) {
-            $paginated = $this->getHTML($link->attr('href'), $pool, $client);
+            if (!$paginated) {
+                break;
+            }
 
             foreach ($paginated->find('.item-description') as $ingredient) {
 
                 $ingredientData = $this->getInfo($ingredient, $client, $pool);
-                file_put_contents("./public/images/ingredients/{$ingredientData['image']}", file_get_contents($ingredientData['img_origin_link']));
+                $ingredientData = $this->getImage('./images/ingredients/', $ingredientData);
 
                 $ingredientData['parent_id'] = DB::create('ingredients', $ingredientData);
                 $ingredientData['short_description'] = null;
 
-                echo "\nMain ingredient: {$ingredientData['name']}";
+                echo "Parsed ingredient: {$ingredientData['name']} \n";
 
                 foreach ($this->page->find('.wiki__sub-item') as $subItem) {
                     $this->parseSubItem($subItem, $ingredientData);
                 }
 
             }
+
+            $page++;
         }
 
     }
@@ -60,20 +64,20 @@ class Ingredient extends DB
         if (!empty($image)) {
             $data['image'] = $data['name'] . '.jpg';
             $data['img_origin_link'] = 'https:' . $image->attr('src');
-            file_put_contents("./public/images/ingredients/{$data['image']}", file_get_contents($data['img_origin_link']));
+            $data = $this->getImage('./images/ingredients/', $data);
         } else {
             $data['image'] = null;
             $data['img_origin_link'] = null;
         }
 
         DB::create('ingredients', $data);
-        echo "\nSub ingredient: {$data['name']}";
+        echo "Parsed ingredient: {$data['name']} \n";
     }
 
     private function getInfo($item, $client, $pool)
     {
         $uri = $item->first('.title a')->attr('href');
-        $shortDescription = $item->first('.lead')->text();
+        $shortDescription = trim($item->first('.lead')->text());
 
         $this->page = $this->getHTML($uri, $pool, $client);
         $imageUri = 'https:' . $this->page->first('.wiki__cover img')->attr('src');
@@ -83,7 +87,7 @@ class Ingredient extends DB
 
         return [
             'name'              => $name,
-            'short_description' => !empty($shortDescription) ? trim($shortDescription) : null,
+            'short_description' => !empty($shortDescription) ? $shortDescription : null,
             'uri'               => $uri,
             'image'             => "{$name}.jpg",
             'img_origin_link'   => $imageUri,

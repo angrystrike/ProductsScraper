@@ -8,6 +8,7 @@ use DiDom\Document;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
 
 
 trait Parsable
@@ -24,7 +25,7 @@ trait Parsable
                     return new Document($html);
                 } catch (ClientException $exception) {
                     return false;
-                } catch (Exception $exception) {
+                } catch (RequestException $exception) {
                     echo "Proxy crashed on link: $link \n";
                     echo "Error: {$exception->getMessage()} \n";
                     sleep(8);
